@@ -30,15 +30,12 @@ if ($null -ne $eudicPath) {
     # 检查是否已存在同名规则
     Write-Host "正在更新防火墙规则 eudic_block ..."
     $existingRule = Get-NetFirewallRule -DisplayName "eudic_block" -erroraction 'silentlycontinue'
+    
+    if ($null -ne $existingRule) {
+        Remove-NetFirewallRule -DisplayName "eudic_block"
+    }
 
-    if ($null -eq $existingRule) {
-        # 如果规则不存在，则添加防火墙规则
-        New-NetFirewallRule -DisplayName "eudic_block" -Direction Outbound -Program $eudicPath -Protocol TCP -RemotePort 443 -Action Block
-    }
-    else {
-        # 如果规则已存在，则输出消息表示规则已存在
-        Set-NetFirewallRule -DisplayName "eudic_block" -Direction Outbound -Program $eudicPath -Protocol TCP -RemotePort 443 -Action Block
-    }
+    New-NetFirewallRule -DisplayName "eudic_block" -Direction Outbound -Program $eudicPath -Protocol TCP -Action Block
     read-host "> 破解完成，重启软件生效"
 }
 else {
