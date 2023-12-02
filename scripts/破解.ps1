@@ -4,6 +4,18 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     exit;
 }
 
+
+function blockProgram($programPath) {
+    $programName = $programPath.Split("\")[-1]
+    $existingRule = Get-NetFirewallRule -DisplayName $programName -erroraction 'silentlycontinue'
+    if ($null -ne $existingRule) {
+        Remove-NetFirewallRule -DisplayName $programName
+    }
+    New-NetFirewallRule -DisplayName $programName -Direction Outbound -Program $programPath -Protocol TCP -Action Block
+    
+}
+
+
 $eudicPath = "C:\Program Files\eudic\eudic.exe"
 # Check if C:\Program Files\eudic\eudic.exe exist
 if (!(Test-Path $eudicPath)) {
@@ -22,20 +34,16 @@ if (!(Test-Path $eudicPath)) {
 }
 if ($null -ne $eudicPath) {
     Write-Host "主程序：" $eudicPath
-
+    
     Write-Host "正在修改注册表 ..."
     $regPath = $PSScriptRoot + "\register.reg"
     reg import $regPath
-
-    # 检查是否已存在同名规则
-    Write-Host "正在更新防火墙规则 eudic_block ..."
-    $existingRule = Get-NetFirewallRule -DisplayName "eudic_block" -erroraction 'silentlycontinue'
     
-    if ($null -ne $existingRule) {
-        Remove-NetFirewallRule -DisplayName "eudic_block"
-    }
-
-    New-NetFirewallRule -DisplayName "eudic_block" -Direction Outbound -Program $eudicPath -Protocol TCP -Action Block
+    # 检查是否已存在同名规则
+    Write-Host "正在更新防火墙规则 ..."
+    $eudicQtPath = $eudicPath.Replace("eudic.exe", "QtWebEngineProcess.exe")
+    blockProgram($eudicPath)
+    blockProgram($eudicQtPath)
     read-host "> 破解完成，重启软件生效"
 }
 else {

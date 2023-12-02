@@ -4,5 +4,6 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
   exit;
 }
 Write-Host "正在还原防火墙规则 ..."
-Remove-NetFirewallRule -DisplayName "eudic_block" -erroraction 'silentlycontinue'
+Remove-NetFirewallRule -DisplayName "eudic.exe" -erroraction 'silentlycontinue'
+Remove-NetFirewallRule -DisplayName "QtWebEngineProcess.exe" -erroraction 'silentlycontinue'
 Read-Host "> 已完成"
